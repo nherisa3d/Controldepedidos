@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Nherisa BI Professional",
+  "version": "5.0",
+  "description": "Dashboard de gestión y Business Intelligence para NHERISA 3D",
+  "action": {
+    "default_title": "Abrir Nherisa BI",
+    "default_icon": {
+      "16": "images/nherisalogotipo.jpg.jpg",
+      "48": "images/nherisalogotipo.jpg.jpg",
+      "128": "images/nherisalogotipo.jpg.jpg"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "images/nherisalogotipo.jpg.jpg",
+    "48": "images/nherisalogotipo.jpg.jpg",
+    "128": "images/nherisalogotipo.jpg.jpg"
+  },
+  "permissions": [
+    "storage"
+  ]
+}
