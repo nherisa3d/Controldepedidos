@@ -1,0 +1,40 @@
+# .gitignore — Control de Pedidos NHERISA 3D
+
+# ─── Variables de entorno (NUNCA versionar) ───
+.env
+.env.local
+.env.*.local
+
+# ─── Backups y datos del usuario ───
+backups/
+
+# ─── Dependencias (si en el futuro se usa npm) ───
+node_modules/
+package-lock.json
+yarn.lock
+
+# ─── Archivos de sistema operativo ───
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Editores e IDEs ───
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+
+# ─── Logs ───
+*.log
+logs/
+
+# ─── Archivos temporales ───
+*.tmp
+*.temp
+*.bak
+~$*
+
+# ─── Build outputs (si en el futuro se usa bundler) ───
+dist/
+build/
+.cache/
