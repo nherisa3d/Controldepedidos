@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHERISA 3D Professional BI</title>
+    <meta name="description" content="Sistema de Control de Pedidos y Business Intelligence para NHERISA 3D. Gestión de pedidos, compras, diseños pendientes y estadísticas mensuales.">
+    <title>Control de Pedidos — NHERISA 3D BI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
     <div id="app">
@@ -13,7 +16,7 @@
         <aside class="sidebar">
             <div class="logo-container">
                 <div class="logo-circle">
-                    <img src="images/nherisalogotipo.jpg.jpg" alt="NHE de RISA Logo" class="logo-img">
+                    <img src="assets/images/nherisalogotipo.jpg" alt="NHERISA 3D Logo" class="logo-img" id="main-logo">
                 </div>
             </div>
             
@@ -22,16 +25,23 @@
                     <h3 class="section-title" style="margin-bottom: 0;">GESTIÓN DE MESES</h3>
                     <button id="btn-new-month" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s;" title="Agregar Nuevo Mes">📅</button>
                 </div>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
                     <select id="month-selector" class="form-control" style="flex: 1; cursor: pointer; outline: none; padding: 0.6rem 0.8rem;">
                         <!-- Meses dinámicos -->
                     </select>
                     <button id="btn-delete-month" style="background: none; border: none; color: #ef4444; font-size: 1.25rem; cursor: pointer; transition: transform 0.2s;" title="Eliminar mes seleccionado">🗑️</button>
                 </div>
+                
+                <h3 class="section-title" style="margin-bottom: 0.5rem;">VISTAS</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button id="btn-view-dashboard" class="btn btn-outline" style="text-align: left; background-color: rgba(157, 78, 221, 0.2); border-color: var(--primary);">📊 Panel de Control</button>
+                    <button id="btn-view-gallery" class="btn btn-outline" style="text-align: left;">🖼️ Galería del Mes</button>
+                </div>
             </div>
 
             <div class="sidebar-footer">
-                <button id="btn-backup" class="btn btn-outline-small">💾 Descargar Respaldo</button>
+                <button id="btn-settings" class="btn btn-outline-small" style="width: 100%;">⚙️ Configuración</button>
+                <button id="btn-backup" class="btn btn-outline-small" style="width: 100%;">💾 Descargar Respaldo</button>
                 <span class="version">BI v5.0 Professional</span>
             </div>
         </aside>
@@ -46,7 +56,8 @@
                 <button id="btn-new-order" class="btn btn-primary">+ Registrar Pedido</button>
             </header>
 
-            <section class="stats-grid">
+            <div id="view-dashboard">
+                <section class="stats-grid">
                 <div class="stat-card">
                     <span class="stat-label">INGRESOS DEL MES</span>
                     <span id="stat-income" class="stat-value text-green">$0</span>
@@ -67,11 +78,12 @@
                         <h3 class="section-title" style="margin-bottom: 0; font-size: 0.85rem; letter-spacing: 1.5px; user-select: none;">📋 CONTROL DE PEDIDOS</h3>
                         <span id="orders-toggle-icon" style="font-size: 1.1rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg); user-select: none;">▼</span>
                     </div>
-                    <div id="orders-table-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 800px; opacity: 1;">
+                    <div id="orders-table-wrapper" style="transition: max-height 0.6s ease-in-out, opacity 0.3s ease-in-out; overflow-y: auto; max-height: 480px; opacity: 1;">
                         <div style="padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 0.5rem;">
                             <table class="data-table">
                                 <thead>
                                     <tr>
+                                        <th>IMAGEN</th>
                                         <th>PRODUCTO</th>
                                         <th>CANT.</th>
                                         <th>PRECIO</th>
@@ -98,8 +110,8 @@
                         </div>
                         <button id="btn-new-compra" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s; color: var(--primary-hover);" title="Agregar Compra Pendiente">+</button>
                     </div>
-                    <div id="compras-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 250px; opacity: 1;">
-                        <div id="compras-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 0.2rem;">
+                    <div id="compras-wrapper" style="transition: max-height 0.6s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 9999px; opacity: 1;">
+                        <div id="compras-container" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 0.4rem;">
                             <!-- Compras dinámicas -->
                         </div>
                     </div>
@@ -113,8 +125,8 @@
                         </div>
                         <button id="btn-new-diseño" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s; color: var(--primary-hover);" title="Agregar Diseño Pendiente">+</button>
                     </div>
-                    <div id="diseños-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 250px; opacity: 1;">
-                        <div id="diseños-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 0.2rem;">
+                    <div id="diseños-wrapper" style="transition: max-height 0.6s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 9999px; opacity: 1;">
+                        <div id="diseños-container" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 0.4rem;">
                             <!-- Diseños dinámicos -->
                         </div>
                     </div>
@@ -127,7 +139,7 @@
                         <h3 class="section-title" style="margin-bottom: 0;">PRODUCTOS MÁS PEDIDOS</h3>
                         <span id="products-toggle-icon" style="font-size: 0.9rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg);">▼</span>
                     </div>
-                    <div id="products-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 300px; opacity: 1;">
+                    <div id="products-wrapper" style="transition: max-height 0.6s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 9999px; opacity: 1;">
                         <div style="height: 250px; margin-top: 1rem; position: relative;">
                             <canvas id="topProductsChart"></canvas>
                         </div>
@@ -139,10 +151,18 @@
                         <h3 class="section-title" style="margin-bottom: 0;">ANOTACIONES DEL MES</h3>
                         <span id="notes-toggle-icon" style="font-size: 0.9rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg);">▼</span>
                     </div>
-                    <div id="notes-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 300px; opacity: 1;">
+                    <div id="notes-wrapper" style="transition: max-height 0.6s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 9999px; opacity: 1;">
                         <textarea id="month-notes" placeholder="Escribe tus notas aquí... (Recordatorios, insumos faltantes, etc.)" style="width: 100%; height: 250px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-main); padding: 1rem; font-family: 'Inter', sans-serif; resize: none; margin-top: 1rem; outline: none; transition: border-color 0.3s;"></textarea>
                     </div>
                 </section>
+            </div>
+            </div>
+            
+            <div id="view-gallery" style="display: none; transition: opacity 0.3s ease;">
+                <h2 style="margin-bottom: 1.5rem; color: var(--primary); font-weight: 600; letter-spacing: 1px;">📸 GALERÍA DEL MES</h2>
+                <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <!-- Imágenes de la galería dinámicas -->
+                </div>
             </div>
         </main>
     </div>
@@ -160,7 +180,7 @@
         </div>
     </div>
 
-    <script src="chart.js"></script>
+    <script src="assets/lib/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -1,19 +1,20 @@
 :root {
-    --bg-dark: #0a0510;
-    --bg-sidebar: rgba(15, 7, 24, 0.85);
-    --bg-card: rgba(28, 20, 39, 0.6);
-    --bg-table-header: rgba(20, 13, 30, 0.8);
-    --bg-modal: rgba(26, 18, 37, 0.95);
+    --bg-dark: #000000;
+    --bg-sidebar: rgba(10, 10, 10, 0.85);
+    --bg-card: rgba(15, 15, 15, 0.6);
+    --bg-table-header: rgba(12, 12, 12, 0.8);
+    --bg-modal: rgba(10, 10, 10, 0.95);
     
-    --primary: #9d4edd;
-    --primary-hover: #c77dff;
-    --primary-glow: rgba(157, 78, 221, 0.5);
+    --primary: #6A4C93;
+    --primary-rgb: 106, 76, 147;
+    --primary-hover: #8e6ab8;
+    --primary-glow: rgba(var(--primary-rgb), 0.5);
     
     --text-main: #ffffff;
     --text-muted: #8e8a9f;
     --green: #10b981;
     
-    --border-color: #2d2438;
+    --border-color: #262626;
     
     --font-family: 'Inter', sans-serif;
 }
@@ -27,7 +28,7 @@
 body {
     font-family: var(--font-family);
     background-color: var(--bg-dark);
-    background-image: url('images/background.jpg.jpg');
+    background-image: url('assets/images/background.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -337,10 +338,10 @@ body {
 .modal-content {
     background-color: var(--bg-modal);
     border: 1px solid var(--primary);
-    box-shadow: 0 0 30px rgba(157, 78, 221, 0.2);
+    box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.2);
     border-radius: 20px;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
     padding: 2rem;
     transform: translateY(0);
     transition: transform 0.3s ease;
@@ -402,7 +403,7 @@ body {
 .form-control:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
+    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.2);
 }
 
 .form-actions {
@@ -414,20 +415,79 @@ body {
 
 /* Selector de Meses Violeta */
 #month-selector {
-    background-color: rgba(157, 78, 221, 0.15) !important;
+    background-color: rgba(var(--primary-rgb), 0.15) !important;
     border: 1px solid var(--primary) !important;
-    box-shadow: 0 0 10px rgba(157, 78, 221, 0.25);
+    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.25);
     color: var(--text-main);
     font-weight: 600;
 }
 
 #month-selector:hover, #month-selector:focus {
-    background-color: rgba(157, 78, 221, 0.25) !important;
+    background-color: rgba(var(--primary-rgb), 0.25) !important;
     border-color: var(--primary-hover) !important;
-    box-shadow: 0 0 15px rgba(157, 78, 221, 0.45);
+    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.45);
 }
 
 #month-selector option {
     background-color: #1a1225;
     color: var(--text-main);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+/* Specific scrollbar styling for tables and containers */
+.table-container ::-webkit-scrollbar-track,
+#compras-container::-webkit-scrollbar-track,
+#diseños-container::-webkit-scrollbar-track,
+#orders-table-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Order Image Thumbnail */
+.order-thumbnail {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.order-thumbnail:hover {
+    transform: scale(1.15);
+    border-color: var(--primary);
+}
+
+.order-thumbnail-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 1.2rem;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
 }

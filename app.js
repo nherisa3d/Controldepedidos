@@ -4,8 +4,40 @@ let state = {
     activeMonthId: null,
     orders: [],
     compras: [],
-    diseños: []
+    diseños: [],
+    settings: {
+        primaryColor: '#6A4C93',
+        backgroundImage: null,
+        profileImage: null
+    }
 };
+
+function applySettings() {
+    if (state.settings) {
+        if (state.settings.primaryColor) {
+            const hex = state.settings.primaryColor;
+            document.documentElement.style.setProperty('--primary', hex);
+            
+            let r = parseInt(hex.slice(1, 3), 16) || 106;
+            let g = parseInt(hex.slice(3, 5), 16) || 76;
+            let b = parseInt(hex.slice(5, 7), 16) || 147;
+            
+            document.documentElement.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+            
+            let hr = Math.min(255, Math.floor(r * 1.2));
+            let hg = Math.min(255, Math.floor(g * 1.2));
+            let hb = Math.min(255, Math.floor(b * 1.2));
+            document.documentElement.style.setProperty('--primary-hover', `rgb(${hr}, ${hg}, ${hb})`);
+        }
+        if (state.settings.backgroundImage) {
+            document.body.style.backgroundImage = `url('${state.settings.backgroundImage}')`;
+        }
+        if (state.settings.profileImage) {
+            const logo = document.getElementById('main-logo');
+            if (logo) logo.src = state.settings.profileImage;
+        }
+    }
+}
 
 // Cargar estado de forma asíncrona usando chrome.storage o localStorage
 async function loadState() {
@@ -24,6 +56,7 @@ async function loadState() {
         // Asegurar que existan las listas de compras y diseños
         if (!state.compras) state.compras = [];
         if (!state.diseños) state.diseños = [];
+        if (!state.settings) state.settings = { primaryColor: '#6A4C93', backgroundImage: null, profileImage: null };
     } catch (e) {
         console.error("Error al cargar datos:", e);
     }
@@ -44,6 +77,11 @@ const DOM = {
     btnNewMonth: document.getElementById('btn-new-month'),
     btnNewOrder: document.getElementById('btn-new-order'),
     btnBackup: document.getElementById('btn-backup'),
+    btnViewDashboard: document.getElementById('btn-view-dashboard'),
+    btnViewGallery: document.getElementById('btn-view-gallery'),
+    viewDashboard: document.getElementById('view-dashboard'),
+    viewGallery: document.getElementById('view-gallery'),
+    galleryGrid: document.getElementById('gallery-grid'),
     
     // Stats
     statIncome: document.getElementById('stat-income'),
@@ -65,6 +103,7 @@ const DOM = {
 // --- Inicialización ---
 async function init() {
     await loadState();
+    applySettings();
     setupEventListeners();
     renderMonths();
     if (state.months.length > 0 && !state.activeMonthId) {
@@ -134,6 +173,10 @@ function renderDashboard() {
     renderOrdersTable(monthOrders);
     renderTopProducts(monthOrders);
     renderTodoLists();
+    
+    if (DOM.viewGallery && DOM.viewGallery.style.display !== 'none') {
+        renderGallery();
+    }
 }
 
 function updateStats(orders, income, units) {
@@ -155,7 +198,11 @@ function renderOrdersTable(orders) {
 
     orders.forEach(order => {
         const tr = document.createElement('tr');
+        const imgHtml = order.image 
+            ? `<img src="${order.image}" alt="${order.product}" class="order-thumbnail img-trigger">` 
+            : `<div class="order-thumbnail-placeholder">📦</div>`;
         tr.innerHTML = `
+            <td>${imgHtml}</td>
             <td style="font-weight: 600;">${order.product}</td>
             <td>${order.quantity}</td>
             <td style="color: var(--green);">${formatter.format(order.price)}</td>
@@ -175,6 +222,13 @@ function renderOrdersTable(orders) {
                 <button class="delete-btn" style="background: none; border: none; color: #ef4444; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s;" title="Eliminar pedido">🗑️</button>
             </td>
         `;
+        
+        if (order.image) {
+            const imgTrigger = tr.querySelector('.img-trigger');
+            if (imgTrigger) {
+                imgTrigger.addEventListener('click', () => showOrderDetails(order));
+            }
+        }
         
         const producedCheck = tr.querySelector('.produced-check');
         producedCheck.addEventListener('change', () => toggleOrderStatus(order.id, 'isProduced'));
@@ -277,6 +331,124 @@ function renderTopProducts(orders) {
 }
 
 // --- Helpers ---
+window.switchView = function(viewName) {
+    if (viewName === 'dashboard') {
+        if (DOM.viewDashboard) DOM.viewDashboard.style.display = 'block';
+        if (DOM.viewGallery) DOM.viewGallery.style.display = 'none';
+        if (DOM.btnViewDashboard) {
+            DOM.btnViewDashboard.style.backgroundColor = 'rgba(157, 78, 221, 0.2)';
+            DOM.btnViewDashboard.style.borderColor = 'var(--primary)';
+        }
+        if (DOM.btnViewGallery) {
+            DOM.btnViewGallery.style.backgroundColor = 'transparent';
+            DOM.btnViewGallery.style.borderColor = 'var(--border-color)';
+        }
+    } else {
+        if (DOM.viewDashboard) DOM.viewDashboard.style.display = 'none';
+        if (DOM.viewGallery) DOM.viewGallery.style.display = 'block';
+        if (DOM.btnViewGallery) {
+            DOM.btnViewGallery.style.backgroundColor = 'rgba(157, 78, 221, 0.2)';
+            DOM.btnViewGallery.style.borderColor = 'var(--primary)';
+        }
+        if (DOM.btnViewDashboard) {
+            DOM.btnViewDashboard.style.backgroundColor = 'transparent';
+            DOM.btnViewDashboard.style.borderColor = 'var(--border-color)';
+        }
+        renderGallery();
+    }
+};
+
+window.renderGallery = function() {
+    if (!DOM.galleryGrid) return;
+    DOM.galleryGrid.innerHTML = '';
+    
+    if (!state.activeMonthId) {
+        DOM.galleryGrid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center;">Selecciona o crea un mes para ver su galería</p>';
+        return;
+    }
+
+    const monthOrders = state.orders.filter(o => o.monthId === state.activeMonthId && o.image);
+    
+    if (monthOrders.length === 0) {
+        DOM.galleryGrid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 2rem; background: var(--bg-card); border-radius: 12px;">No hay pedidos con imagen guardada en este mes.</p>';
+        return;
+    }
+    
+    const formatter = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+
+    monthOrders.forEach(order => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.style.backgroundColor = 'var(--bg-card)';
+        div.style.borderRadius = '12px';
+        div.style.overflow = 'hidden';
+        div.style.border = '1px solid rgba(255, 255, 255, 0.05)';
+        div.style.cursor = 'pointer';
+        div.style.transition = 'transform 0.2s, box-shadow 0.2s';
+        
+        div.innerHTML = `
+            <img src="${order.image}" alt="${order.product}" style="width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <div style="padding: 1rem;">
+                <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; font-weight: 600;">${order.product}</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Cant: ${order.quantity}</span>
+                    <span style="color: var(--green); font-weight: 600; font-size: 0.9rem;">${formatter.format(order.price)}</span>
+                </div>
+            </div>
+        `;
+        
+        div.addEventListener('click', () => showOrderDetails(order));
+        div.addEventListener('mouseover', () => { div.style.transform = 'translateY(-5px)'; div.style.boxShadow = '0 10px 20px rgba(0,0,0,0.4)'; });
+        div.addEventListener('mouseout', () => { div.style.transform = 'translateY(0)'; div.style.boxShadow = 'none'; });
+        
+        DOM.galleryGrid.appendChild(div);
+    });
+};
+
+window.showOrderDetails = function(order) {
+    const formatter = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+    
+    // Función para abrir la imagen en pantalla completa
+    const zoomScript = `
+        const w = window.open('');
+        w.document.write('<html><body style="margin:0; background:#000; display:flex; justify-content:center; align-items:center; height:100vh;"><img src="${order.image}" style="max-width:100%; max-height:100vh; object-fit:contain;"></body></html>');
+    `;
+    
+    const imageHtml = order.image ? `<img src="${order.image}" onclick="${zoomScript.replace(/"/g, '&quot;').replace(/\n/g, '')}" style="cursor: zoom-in; width: 100%; max-height: 350px; object-fit: contain; border-radius: 10px; margin-bottom: 1rem; border: 1px solid var(--border-color); background: rgba(0,0,0,0.5);" title="Haz clic para ampliar a pantalla completa">` : '';
+    
+    const bodyHtml = `
+        <div style="text-align: center;">
+            ${imageHtml}
+            <h2 style="margin-bottom: 0.5rem; color: var(--text-main); font-size: 1.5rem;">${order.product}</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Detalles del Pedido</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: left; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px;">
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-bottom: 0.2rem;">Cantidad</span>
+                    <span style="font-weight: 600; font-size: 1.1rem;">${order.quantity} unidades</span>
+                </div>
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-bottom: 0.2rem;">Precio Total</span>
+                    <span style="color: var(--green); font-weight: 600; font-size: 1.1rem;">${formatter.format(order.price)}</span>
+                </div>
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-bottom: 0.2rem;">Producción</span>
+                    <span style="font-weight: 600; font-size: 1.1rem;">${formatDate(order.productionDate)}</span>
+                </div>
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-bottom: 0.2rem;">Entrega</span>
+                    <span style="font-weight: 600; font-size: 1.1rem;">${formatDate(order.deliveryDate)}</span>
+                </div>
+            </div>
+            <div style="margin-top: 1.5rem;">
+                <button type="button" class="btn btn-outline cancel-btn" style="width: 100%;">Cerrar Ventana</button>
+            </div>
+        </div>
+    `;
+    
+    openModal('Información del Pedido', bodyHtml, () => {});
+};
+
 window.toggleOrderStatus = function(orderId, field) {
     const order = state.orders.find(o => o.id === orderId);
     if (order) {
@@ -286,16 +458,41 @@ window.toggleOrderStatus = function(orderId, field) {
     }
 };
 
+window.customConfirm = function(message, onConfirm) {
+    const bodyHtml = `
+        <div style="text-align: center; padding: 1rem 0;">
+            <p style="font-size: 1.1rem; margin-bottom: 2rem; color: var(--text-main);">${message}</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button type="button" class="btn btn-outline cancel-btn" style="flex: 1;">Cancelar</button>
+                <button type="button" id="btn-confirm-action" class="btn btn-primary" style="flex: 1; background-color: #ef4444; border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);">Eliminar</button>
+            </div>
+        </div>
+    `;
+    
+    openModal('⚠️ Confirmar Acción', bodyHtml, () => {});
+    
+    setTimeout(() => {
+        const confirmBtn = document.getElementById('btn-confirm-action');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                onConfirm();
+                closeModal();
+            });
+        }
+    }, 10);
+};
+
 window.deleteOrder = function(orderId) {
-    if (confirm('¿Estás seguro de que deseas eliminar este pedido?')) {
+    customConfirm('¿Estás seguro de que deseas eliminar este pedido?', () => {
         state.orders = state.orders.filter(o => o.id !== orderId);
         saveState();
         renderDashboard();
-    }
+        if (DOM.viewGallery && DOM.viewGallery.style.display !== 'none') renderGallery();
+    });
 };
 
 window.deleteMonth = function(monthId) {
-    if (confirm('¿Estás seguro de que deseas eliminar este mes, todos sus pedidos, compras y diseños?')) {
+    customConfirm('¿Estás seguro de que deseas eliminar este mes, todos sus pedidos, compras y diseños?', () => {
         state.months = state.months.filter(m => m.id !== monthId);
         state.orders = state.orders.filter(o => o.monthId !== monthId);
         if (state.compras) state.compras = state.compras.filter(c => c.monthId !== monthId);
@@ -308,7 +505,7 @@ window.deleteMonth = function(monthId) {
         saveState();
         renderMonths();
         renderDashboard();
-    }
+    });
 };
 function formatDate(dateString) {
     if (!dateString) return '-';
@@ -321,6 +518,43 @@ function formatDate(dateString) {
 
 function generateId() {
     return Math.random().toString(36).substr(2, 9);
+}
+
+function compressImage(file, maxSize = 120) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxSize) {
+                        height *= maxSize / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width *= maxSize / height;
+                        height = maxSize;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                resolve(canvas.toDataURL('image/jpeg', 0.7));
+            };
+            img.onerror = () => resolve(null);
+        };
+        reader.onerror = () => resolve(null);
+    });
 }
 
 // --- Modales ---
@@ -463,6 +697,9 @@ function setupEventListeners() {
         if (e.target === DOM.modalOverlay) closeModal();
     });
 
+    if (DOM.btnViewDashboard) DOM.btnViewDashboard.addEventListener('click', () => switchView('dashboard'));
+    if (DOM.btnViewGallery) DOM.btnViewGallery.addEventListener('click', () => switchView('gallery'));
+
     // Plegar/desplegar tabla de pedidos
     const btnToggleOrders = document.getElementById('btn-toggle-orders');
     const ordersTableWrapper = document.getElementById('orders-table-wrapper');
@@ -471,7 +708,7 @@ function setupEventListeners() {
         btnToggleOrders.addEventListener('click', () => {
             const isCollapsed = ordersTableWrapper.style.maxHeight === '0px';
             if (isCollapsed) {
-                ordersTableWrapper.style.maxHeight = '800px';
+                ordersTableWrapper.style.maxHeight = '480px';
                 ordersTableWrapper.style.opacity = '1';
                 ordersToggleIcon.style.transform = 'rotate(0deg)';
             } else {
@@ -490,7 +727,7 @@ function setupEventListeners() {
         btnToggleCompras.addEventListener('click', () => {
             const isCollapsed = comprasWrapper.style.maxHeight === '0px';
             if (isCollapsed) {
-                comprasWrapper.style.maxHeight = '250px';
+                comprasWrapper.style.maxHeight = '9999px';
                 comprasWrapper.style.opacity = '1';
                 comprasToggleIcon.style.transform = 'rotate(0deg)';
             } else {
@@ -509,7 +746,7 @@ function setupEventListeners() {
         btnToggleDiseños.addEventListener('click', () => {
             const isCollapsed = diseñosWrapper.style.maxHeight === '0px';
             if (isCollapsed) {
-                diseñosWrapper.style.maxHeight = '250px';
+                diseñosWrapper.style.maxHeight = '9999px';
                 diseñosWrapper.style.opacity = '1';
                 diseñosToggleIcon.style.transform = 'rotate(0deg)';
             } else {
@@ -528,7 +765,7 @@ function setupEventListeners() {
         btnToggleProducts.addEventListener('click', () => {
             const isCollapsed = productsWrapper.style.maxHeight === '0px';
             if (isCollapsed) {
-                productsWrapper.style.maxHeight = '300px';
+                productsWrapper.style.maxHeight = '9999px';
                 productsWrapper.style.opacity = '1';
                 productsToggleIcon.style.transform = 'rotate(0deg)';
             } else {
@@ -547,7 +784,7 @@ function setupEventListeners() {
         btnToggleNotes.addEventListener('click', () => {
             const isCollapsed = notesWrapper.style.maxHeight === '0px';
             if (isCollapsed) {
-                notesWrapper.style.maxHeight = '300px';
+                notesWrapper.style.maxHeight = '9999px';
                 notesWrapper.style.opacity = '1';
                 notesToggleIcon.style.transform = 'rotate(0deg)';
             } else {
@@ -575,6 +812,54 @@ function setupEventListeners() {
         });
     }
 
+    // Configuración
+    const btnSettings = document.getElementById('btn-settings');
+    if (btnSettings) {
+        btnSettings.addEventListener('click', () => {
+            const currentSettings = state.settings || { primaryColor: '#6A4C93' };
+            const bodyHtml = `
+                <form id="dynamic-form">
+                    <div class="form-group">
+                        <label for="primaryColor">Color Principal</label>
+                        <input type="color" id="primaryColor" name="primaryColor" value="${currentSettings.primaryColor}" class="form-control" style="height: 50px; padding: 0.2rem;">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileImage">Foto de Perfil (Opcional)</label>
+                        <input type="file" id="profileImage" name="profileImage" accept="image/*" class="form-control" style="padding: 0.6rem 1rem;">
+                    </div>
+                    <div class="form-group">
+                        <label for="backgroundImage">Fondo de Pantalla (Opcional)</label>
+                        <input type="file" id="backgroundImage" name="backgroundImage" accept="image/*" class="form-control" style="padding: 0.6rem 1rem;">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline cancel-btn">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            `;
+            openModal('Configuración de Estética', bodyHtml, async (data) => {
+                let profileBase64 = currentSettings.profileImage;
+                let bgBase64 = currentSettings.backgroundImage;
+                
+                if (data.profileImage && data.profileImage.size > 0) {
+                    profileBase64 = await compressImage(data.profileImage, 250);
+                }
+                if (data.backgroundImage && data.backgroundImage.size > 0) {
+                    bgBase64 = await compressImage(data.backgroundImage, 1920);
+                }
+                
+                state.settings = {
+                    primaryColor: data.primaryColor,
+                    profileImage: profileBase64,
+                    backgroundImage: bgBase64
+                };
+                saveState();
+                applySettings();
+                closeModal();
+            });
+        });
+    }
+
     // Nueva Compra Pendiente
     const btnNewCompra = document.getElementById('btn-new-compra');
     if (btnNewCompra) {
@@ -587,7 +872,7 @@ function setupEventListeners() {
                 <form id="dynamic-form">
                     <div class="form-group">
                         <label for="compraText">Descripción de la Compra</label>
-                        <input type="text" id="compraText" name="compraText" class="form-control" required autocomplete="off" placeholder="Ej. Filamento PLA Silky Oro 1kg">
+                        <input type="text" id="compraText" name="compraText" class="form-control" required autocomplete="off" placeholder="Ej. Comprar resmas de papel A4">
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-outline cancel-btn">Cancelar</button>
@@ -695,6 +980,10 @@ function setupEventListeners() {
                     <label for="product">Producto</label>
                     <input type="text" id="product" name="product" class="form-control" required autocomplete="off" placeholder="Ej. Llavero Personalizado">
                 </div>
+                <div class="form-group">
+                    <label for="orderImage">Imagen del Pedido (Opcional)</label>
+                    <input type="file" id="orderImage" name="orderImage" accept="image/*" class="form-control" style="padding: 0.6rem 1rem;">
+                </div>
                 <div style="display: flex; gap: 1rem;">
                     <div class="form-group" style="flex: 1;">
                         <label for="quantity">Cantidad</label>
@@ -721,11 +1010,17 @@ function setupEventListeners() {
                 </div>
             </form>
         `;
-        openModal('Registrar Nuevo Pedido', bodyHtml, (data) => {
+        openModal('Registrar Nuevo Pedido', bodyHtml, async (data) => {
+            let base64Image = null;
+            if (data.orderImage && data.orderImage.size > 0) {
+                base64Image = await compressImage(data.orderImage, 800);
+            }
+            
             const newOrder = {
                 id: generateId(),
                 monthId: state.activeMonthId,
                 product: data.product,
+                image: base64Image,
                 quantity: parseInt(data.quantity),
                 price: parseFloat(data.price),
                 productionDate: data.productionDate,
