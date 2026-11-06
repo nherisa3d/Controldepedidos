@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHERISA 3D Professional BI</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <img src="images/nherisalogotipo.jpg.jpg" alt="NHE de RISA Logo" class="logo-img">
+                </div>
+            </div>
+            
+            <div class="sidebar-section" style="flex: 0 0 auto; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 class="section-title" style="margin-bottom: 0;">GESTIÓN DE MESES</h3>
+                    <button id="btn-new-month" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s;" title="Agregar Nuevo Mes">📅</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select id="month-selector" class="form-control" style="flex: 1; cursor: pointer; outline: none; padding: 0.6rem 0.8rem;">
+                        <!-- Meses dinámicos -->
+                    </select>
+                    <button id="btn-delete-month" style="background: none; border: none; color: #ef4444; font-size: 1.25rem; cursor: pointer; transition: transform 0.2s;" title="Eliminar mes seleccionado">🗑️</button>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="btn-backup" class="btn btn-outline-small">💾 Descargar Respaldo</button>
+                <span class="version">BI v5.0 Professional</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h1 class="main-title">CONTROL DE PEDIDOS</h1>
+                    <h2 class="sub-title">NHERISA 3D PROFESSIONAL BI</h2>
+                </div>
+                <button id="btn-new-order" class="btn btn-primary">+ Registrar Pedido</button>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">INGRESOS DEL MES</span>
+                    <span id="stat-income" class="stat-value text-green">$0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">PEDIDOS</span>
+                    <span id="stat-orders" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">UNIDADES</span>
+                    <span id="stat-units" class="stat-value">0</span>
+                </div>
+            </section>
+
+            <section class="table-section">
+                <div class="table-container" style="padding: 1.5rem 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-bottom: 0.2rem;" id="btn-toggle-orders">
+                        <h3 class="section-title" style="margin-bottom: 0; font-size: 0.85rem; letter-spacing: 1.5px; user-select: none;">📋 CONTROL DE PEDIDOS</h3>
+                        <span id="orders-toggle-icon" style="font-size: 1.1rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg); user-select: none;">▼</span>
+                    </div>
+                    <div id="orders-table-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 800px; opacity: 1;">
+                        <div style="padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 0.5rem;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>PRODUCTO</th>
+                                        <th>CANT.</th>
+                                        <th>PRECIO</th>
+                                        <th>PRODUCCIÓN</th>
+                                        <th>ENTREGA</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-table-body">
+                                    <!-- Pedidos dinámicos -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="todo-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <section class="compras-section" style="background-color: var(--bg-card); border-radius: 20px; padding: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;" id="btn-toggle-compras">
+                            <h3 class="section-title" style="margin-bottom: 0; font-size: 0.85rem; letter-spacing: 1.5px;">🛒 COMPRAS PENDIENTES</h3>
+                            <span id="compras-toggle-icon" style="font-size: 0.9rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg);">▼</span>
+                        </div>
+                        <button id="btn-new-compra" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s; color: var(--primary-hover);" title="Agregar Compra Pendiente">+</button>
+                    </div>
+                    <div id="compras-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 250px; opacity: 1;">
+                        <div id="compras-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 0.2rem;">
+                            <!-- Compras dinámicas -->
+                        </div>
+                    </div>
+                </section>
+
+                <section class="diseños-section" style="background-color: var(--bg-card); border-radius: 20px; padding: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;" id="btn-toggle-diseños">
+                            <h3 class="section-title" style="margin-bottom: 0; font-size: 0.85rem; letter-spacing: 1.5px;">🎨 DISEÑOS PENDIENTES</h3>
+                            <span id="diseños-toggle-icon" style="font-size: 0.9rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg);">▼</span>
+                        </div>
+                        <button id="btn-new-diseño" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s; color: var(--primary-hover);" title="Agregar Diseño Pendiente">+</button>
+                    </div>
+                    <div id="diseños-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 250px; opacity: 1;">
+                        <div id="diseños-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 0.2rem;">
+                            <!-- Diseños dinámicos -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="bottom-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <section class="top-products-section" style="margin-top: 0; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; margin-bottom: 0.5rem;" id="btn-toggle-products">
+                        <h3 class="section-title" style="margin-bottom: 0;">PRODUCTOS MÁS PEDIDOS</h3>
+                        <span id="products-toggle-icon" style="font-size: 0.9rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg);">▼</span>
+                    </div>
+                    <div id="products-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 300px; opacity: 1;">
+                        <div style="height: 250px; margin-top: 1rem; position: relative;">
+                            <canvas id="topProductsChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="notes-section" style="background-color: var(--bg-card); border-radius: 20px; padding: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; margin-bottom: 0.5rem;" id="btn-toggle-notes">
+                        <h3 class="section-title" style="margin-bottom: 0;">ANOTACIONES DEL MES</h3>
+                        <span id="notes-toggle-icon" style="font-size: 0.9rem; color: var(--text-muted); transition: transform 0.3s; transform: rotate(0deg);">▼</span>
+                    </div>
+                    <div id="notes-wrapper" style="transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 300px; opacity: 1;">
+                        <textarea id="month-notes" placeholder="Escribe tus notas aquí... (Recordatorios, insumos faltantes, etc.)" style="width: 100%; height: 250px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-main); padding: 1rem; font-family: 'Inter', sans-serif; resize: none; margin-top: 1rem; outline: none; transition: border-color 0.3s;"></textarea>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals (Popups) -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" class="modal-title">Título Modal</h3>
+                <button id="btn-close-modal" class="btn-close">&times;</button>
+            </div>
+            <div id="modal-body" class="modal-body">
+                <!-- Contenido del modal dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <script src="chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
