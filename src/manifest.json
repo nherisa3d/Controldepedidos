@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "NHERISA 3D — Control de Pedidos",
+  "version": "5.2",
+  "description": "Dashboard de gestión y Business Intelligence para NHERISA 3D. Control de pedidos, ingresos y producción mensual.",
+  "action": {
+    "default_title": "Abrir Control de Pedidos",
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "assets/images/nherisalogotipo.jpg",
+      "48": "assets/images/nherisalogotipo.jpg",
+      "128": "assets/images/nherisalogotipo.jpg"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "assets/images/nherisalogotipo.jpg",
+    "48": "assets/images/nherisalogotipo.jpg",
+    "128": "assets/images/nherisalogotipo.jpg"
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage"
+  ]
+}
