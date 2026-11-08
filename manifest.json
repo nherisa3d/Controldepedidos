@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NHERISA 3D — Control de Pedidos",
-  "version": "5.1",
+  "version": "5.2",
   "description": "Dashboard de gestión y Business Intelligence para NHERISA 3D. Control de pedidos, ingresos y producción mensual.",
   "action": {
     "default_title": "Abrir Control de Pedidos",
